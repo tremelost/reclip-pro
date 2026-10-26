@@ -1,0 +1,7 @@
+backend/
+requirements.txt
+Dockerfile
+docker-compose.yml
+*.bat
+.venv/
+venv/

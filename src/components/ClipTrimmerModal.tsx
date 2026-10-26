@@ -13,7 +13,7 @@ interface ClipTrimmerModalProps {
   videoDuration: number;
   transcript?: TranscriptLine[];
   onClose: () => void;
-  onApply: (adjustedClip: ViralClip) => void;
+  onApply?: (adjustedClip: ViralClip) => void;
   onDownload: (adjustedClip: ViralClip) => Promise<void> | void;
 }
 
@@ -577,7 +577,11 @@ export const ClipTrimmerModal: React.FC<ClipTrimmerModalProps> = ({
     setIsDownloading(true);
     setDownloadSuccess(false);
     try {
-      await onDownload(getAdjustedClip());
+      const adjusted = getAdjustedClip();
+      if (onApply) {
+        onApply(adjusted);
+      }
+      await onDownload(adjusted);
       setDownloadSuccess(true);
     } catch (err) {
       console.error('Failed to download clip:', err);

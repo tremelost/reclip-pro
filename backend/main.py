@@ -77,16 +77,18 @@ from fastapi.responses import JSONResponse
 async def lifespan(app: FastAPI):
     # Ensure all logger handlers (including Uvicorn) have the security masking filter attached
     install_security_logging()
-    # Startup: spawn auto-cleanup background task
-    cleanup_task = asyncio.create_task(background_storage_cleanup_worker())
-    logger.info("[Auto-Cleanup] Storage daemon active (Interval: 30m, TTL: 1h, Quota: 5GB).")
+    cleanup_task = None
+    if not (os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME")):
+        cleanup_task = asyncio.create_task(background_storage_cleanup_worker())
+        logger.info("[Auto-Cleanup] Storage daemon active (Interval: 30m, TTL: 1h, Quota: 5GB).")
     yield
     # Shutdown: cancel task cleanly
-    cleanup_task.cancel()
-    try:
-        await cleanup_task
-    except asyncio.CancelledError:
-        pass
+    if cleanup_task:
+        cleanup_task.cancel()
+        try:
+            await cleanup_task
+        except asyncio.CancelledError:
+            pass
 
 
 # Initialize FastAPI Application

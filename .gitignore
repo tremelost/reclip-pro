@@ -17,6 +17,7 @@ dist-ssr/
 # Build artifacts
 .vite/
 .cache/
+.vercel/
 
 # Logs
 logs/
@@ -153,3 +154,4 @@ $RECYCLE.BIN/
 *.key
 *.p12
 *.pfx
+.vercel

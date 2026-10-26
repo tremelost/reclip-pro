@@ -20,8 +20,13 @@ from PIL import Image, ImageDraw, ImageFont
 logger = logging.getLogger("cheat-clip-pro.video-engine")
 
 BASE_DIR = Path(__file__).resolve().parent
-TEMP_DIR = BASE_DIR / "temp_clips"
-EXPORTS_DIR = BASE_DIR / "exports"
+if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    _temp_root = Path(tempfile.gettempdir())
+    TEMP_DIR = _temp_root / "temp_clips"
+    EXPORTS_DIR = _temp_root / "exports"
+else:
+    TEMP_DIR = BASE_DIR / "temp_clips"
+    EXPORTS_DIR = BASE_DIR / "exports"
 FONTS_DIR = BASE_DIR / "fonts"
 COOKIES_PATH = BASE_DIR / "cookies.txt"
 ROOT_COOKIES_PATH = BASE_DIR.parent / "cookies.txt"
@@ -193,12 +198,16 @@ def get_effective_cookies_path() -> Optional[Path]:
 CASCADE_PATH = BASE_DIR / "haarcascade_frontalface_default.xml"
 CASCADES_DIR = BASE_DIR / "cascades"
 YUNET_MODEL_PATH = CASCADES_DIR / "face_detection_yunet.onnx"
-TEMP_DIR.mkdir(parents=True, exist_ok=True)
-EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
-FONTS_DIR.mkdir(parents=True, exist_ok=True)
-CASCADES_DIR.mkdir(parents=True, exist_ok=True)
+for _dir_to_make in (TEMP_DIR, EXPORTS_DIR, FONTS_DIR, CASCADES_DIR):
+    try:
+        _dir_to_make.mkdir(parents=True, exist_ok=True)
+    except Exception:
+        pass
 UPLOADS_DIR = TEMP_DIR / "uploads"
-UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+try:
+    UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
 
 def _ffmpeg_has_filter(executable: str, filter_name: str) -> bool:
     """Returns whether an FFmpeg binary exposes the requested filter."""

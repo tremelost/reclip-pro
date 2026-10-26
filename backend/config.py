@@ -117,4 +117,7 @@ except ImportError:
     )
 
 UPLOADS_DIR = TEMP_DIR / "uploads"
-UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+try:
+    UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
